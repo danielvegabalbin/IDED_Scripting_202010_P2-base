@@ -12,12 +12,17 @@ public class Target : MonoBehaviour
 
     [SerializeField]
     private int scoreAdd = 10;
-
+    
     private void Start()
     {
         currentHP = maxHP;
-        Destroy(gameObject, TIME_TO_DESTROY);
+        
     }
+
+  
+
+   
+    
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -25,7 +30,7 @@ public class Target : MonoBehaviour
 
         if (collidedObjectLayer.Equals(Utils.BulletLayer))
         {
-            Destroy(collision.gameObject);
+            collision.gameObject.transform.position= new Vector3(0,-100,0);
 
             currentHP -= 1;
 
@@ -35,28 +40,30 @@ public class Target : MonoBehaviour
 
                 if (player != null)
                 {
-                    player.Score += scoreAdd;
+                    
+                   
+                    player.ScoreChangedMethod(scoreAdd);
                 }
 
-                Destroy(gameObject);
+                gameObject.transform.position = new Vector3(0, -50, 0);
             }
         }
-        else if (collidedObjectLayer.Equals(Utils.PlayerLayer) ||
-            collidedObjectLayer.Equals(Utils.KillVolumeLayer))
+        else if (collidedObjectLayer.Equals(Utils.PlayerLayer) || collidedObjectLayer.Equals(Utils.KillVolumeLayer))
         {
             Player player = FindObjectOfType<Player>();
 
             if (player != null)
             {
-                player.Lives -= 1;
-
+                player.playerHitMetod();
+              
+               
                 if (player.Lives <= 0 && player.OnPlayerDied != null)
                 {
-                    player.OnPlayerDied();
+                    player.PlayerDeathMetod();
                 }
             }
 
-            Destroy(gameObject);
+            gameObject.transform.position = new Vector3(0, -50, 0);
         }
     }
 }

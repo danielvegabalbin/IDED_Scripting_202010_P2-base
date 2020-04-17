@@ -15,7 +15,13 @@ public class SpawnController : MonoBehaviour
     private Player player;
 
     private Vector3 spawnPoint;
+    #region Pooling
+    private GameObject[] spawnedObjectsPool;
+    private int MaxObjectsAllowed=5;
+    int poolPositioner = 0;
+    int poolSelectioner = 0;
 
+    #endregion
     private bool IsThereAtLeastOneObjectToSpawn
     {
         get
@@ -39,6 +45,8 @@ public class SpawnController : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+     //   poolPositioner = 0;
+        spawnedObjectsPool = new GameObject[MaxObjectsAllowed];
         if (spawnObjects.Length > 0 && IsThereAtLeastOneObjectToSpawn)
         {
             InvokeRepeating("SpawnObject", firstSpawnDelay, spawnRate);
@@ -49,7 +57,7 @@ public class SpawnController : MonoBehaviour
             }
         }
     }
-
+    
     private void SpawnObject()
     {
         GameObject spawnGO = spawnObjects[Random.Range(0, spawnObjects.Length)];
@@ -59,10 +67,36 @@ public class SpawnController : MonoBehaviour
             spawnPoint = Camera.main.ViewportToWorldPoint(new Vector3(
                 Random.Range(0F, 1F), 1F, transform.position.z));
 
-            GameObject instance = Instantiate(spawnGO, spawnPoint, Quaternion.identity);
+
+            if (poolPositioner <= MaxObjectsAllowed-1)
+            {
+                Debug.Log(poolPositioner);
+                GameObject instance = Instantiate(spawnGO, spawnPoint, Quaternion.identity);
+                spawnedObjectsPool[poolPositioner] = instance;
+                poolPositioner++;
+                
+            }
+            else
+            {
+                SpawnFromPool();
+            }
+            
         }
     }
-
+    public void SpawnFromPool() {
+       
+        if (spawnedObjectsPool[poolSelectioner]!= null) { 
+        spawnedObjectsPool[poolSelectioner].transform.position = spawnPoint;
+            spawnedObjectsPool[poolSelectioner].GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+        poolSelectioner++;
+        Debug.Log("spawningFromPool");
+        }
+        if (poolSelectioner > MaxObjectsAllowed - 1) {
+            Debug.Log("poolreestart");
+            poolSelectioner = 0;
+        }
+        
+    }
     private void StopSpawning()
     {
         CancelInvoke();
